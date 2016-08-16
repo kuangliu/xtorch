@@ -118,7 +118,7 @@ function xtorch.train()
     local nEpoch = opt.nEpoch
     local batchSize = opt.batchSize
     local optimState = opt.optimState
-    local dataset = opt.trainData
+    local dataset = opt.traindata
     local c = require 'trepl.colorize'
 
     -- epoch tracker
@@ -180,7 +180,7 @@ function xtorch.test()
     xtorch.cudaSync()
     net:evaluate()
 
-    local dataset = opt.testData
+    local dataset = opt.testdata
     local epochSize = math.floor(dataset.N/opt.batchSize)
     local bs = opt.batchSize
 

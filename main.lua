@@ -64,8 +64,8 @@ opt = {
     ----------- net options --------------------
     net = net,
     ----------- data options -------------------
-    trainData = traindata,
-    testData = testdata,
+    traindata = traindata,
+    testdata = testdata,
     nhorse = 8,   -- nb of threads to load data, default 1
     ----------- training options ---------------
     batchSize = 128,

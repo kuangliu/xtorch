@@ -25,8 +25,8 @@ ds = ListDataset({
 })
 ```
 
-- `directory` is a folder containing images
-- `list` is a list files containing the image names and labels/targets separated by spaces.
+- `directory` is a folder containing images.  
+- `list` is a list files containing the image names and labels/targets separated by spaces.  
 
 ### `classdataset`
 Loads training & test data from disk. But unlike `listdataset`, there is no index list,
@@ -65,8 +65,8 @@ ds = ClassDataset({
 - model options:
     - `net`: network to fit
 - data options:  
-    - `trainData`: train dataset  
-    - `testData`: test dataset  
+    - `traindata`: train dataset  
+    - `testdata`: test dataset  
     - `nhorse`: nb of threads to load data  
 - training options:
     - `batchSize`: batch size
@@ -97,8 +97,8 @@ opt = {
     ----------- net options --------------------
     net = net,
     ----------- data options -------------------
-    trainData = traindata,
-    testData = testdata,
+    traindata = traindata,
+    testdata = testdata,
     nhorse = 8,   -- nb of threads to load data, default 1
     ----------- training options ---------------
     batchSize = 128,
@@ -121,4 +121,4 @@ xtorch.fit(opt)
 ## log & checkpoint  
 - `utils.log`: automatically adding log while training.  
 - `utils.saveCheckpoint`: saves checkpoint to disk.  
-- `utils.loadCheckpoint`: loades saved checkpoint when `opt.resume=true`  
+- `utils.loadCheckpoint`: loads saved checkpoint when `opt.resume=true`.  

@@ -3,7 +3,7 @@
 -- and targets.
 --------------------------------------------------------------------------------
 
-dofile('./dataloader/classdataloader.lua')
+dofile('./xtorch-dataset/dataloader/listdataloader.lua')
 
 local ListDataset = torch.class 'ListDataset'
 pathcat = paths.concat
