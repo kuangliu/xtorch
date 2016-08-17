@@ -119,7 +119,6 @@ do
          acc = acc or 0
          io.write(string.format(' | loss: %.5f | acc: %.5f', loss, acc))
 
-
          -- go back to center of bar, and print progress
          for i=1,37+#tm+barLength/2 do io.write('\b') end
          io.write(' ', current, '/', goal, ' ')

@@ -45,8 +45,11 @@ torch.save('./cache/testdata.t7',testdata)
 dofile('augment.lua')
 dofile('./models/resnet.lua')
 dofile('./models/vgg.lua')
+dofile('./models/googlenet.lua.lua')
+
 --net = getResNet()
-net = getVGG()
+--net = getVGG()
+net = getGooglenet()
 
 ------------------------------------------------
 -- 3. init optimization params

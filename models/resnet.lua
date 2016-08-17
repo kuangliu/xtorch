@@ -2,8 +2,8 @@ require 'nn'
 
 ReLU = nn.ReLU
 Conv = nn.SpatialConvolution
-MaxPool = nn.SpatialMaxPooling
-AvgPool = nn.SpatialAveragePooling
+MaxP = nn.SpatialMaxPooling
+AvgP = nn.SpatialAveragePooling
 BN = nn.SpatialBatchNormalization
 
 local shortCutType = 'CONV' or 'ZERO_PAD'

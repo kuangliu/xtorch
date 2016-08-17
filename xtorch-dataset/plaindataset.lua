@@ -1,6 +1,5 @@
 --------------------------------------------------------------------------------
--- plaindataset: wraps X_train, Y_train / X_test, Y_test
---               to give a unified interface.
+-- plaindataset: wraps X & Y to give a unified interface.
 --------------------------------------------------------------------------------
 
 local PlainDataset = torch.class 'PlainDataset'
