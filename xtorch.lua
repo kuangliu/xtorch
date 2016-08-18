@@ -219,8 +219,8 @@ function xtorch.test()
         utils.saveCheckpoint(net, epoch, optimState, bestAcc)
     end
 
-    if opt.verbose then print(confusion) end
     confusion:zero()
+    if opt.verbose then print(confusion) end
     print('\n')
 end
 

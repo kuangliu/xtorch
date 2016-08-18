@@ -10,31 +10,36 @@ MaxP = nn.SpatialMaxPooling
 AvgP = nn.SpatialAveragePooling
 BN = nn.SpatialBatchNormalization
 
-function inception(nInputPlane, n1, n31, n33, n51, n53, nPool)
+function inception(nInputPlane, n1x1, n3x3red, n3x3, n5x5red, n5x5, nPool)
     local cat = nn.Concat(2)
 
     -- 1x1 branch
     local b1 = nn.Sequential()
-                :add(Conv(nInputPlane,n1,1,1))
-                :add(BN(n1,1e-3))
+                :add(Conv(nInputPlane,n1x1,1,1))
+                :add(BN(n1x1,1e-3))
                 :add(ReLU(true))
 
     -- 1x1-3x3 branch
     local b2 = nn.Sequential()
-                :add(Conv(nInputPlane,n31,1,1))
-                :add(BN(n31,1e-3))
+                :add(Conv(nInputPlane,n3x3red,1,1))
+                :add(BN(n3x3red,1e-3))
                 :add(ReLU(true))
-                :add(Conv(n31,n33,3,3,1,1,1,1))
-                :add(BN(n33,1e-3))
+                :add(Conv(n3x3red,n3x3,3,3,1,1,1,1))
+                :add(BN(n3x3,1e-3))
                 :add(ReLU(true))
 
     -- 1x1-5x5 branch
     local b3 = nn.Sequential()
-                :add(Conv(nInputPlane,n51,1,1))
-                :add(BN(n51,1e-3))
+                :add(Conv(nInputPlane,n5x5red,1,1))
+                :add(BN(n5x5red,1e-3))
                 :add(ReLU(true))
-                :add(Conv(n51,n53,5,5,1,1,2,2))
-                :add(BN(n53,1e-3))
+                -- :add(Conv(n5x5red,n5x5,5,5,1,1,2,2)) -- replace 5x5 with 3x3
+                -- :add(BN(n5x5,1e-3))
+                :add(Conv(n5x5red,n5x5,3,3,1,1,1,1))
+                :add(BN(n5x5,1e-3))
+                :add(ReLU(true))
+                :add(Conv(n5x5,n5x5,3,3,1,1,1,1))
+                :add(BN(n5x5,1e-3))
                 :add(ReLU(true))
 
     -- 3x3pool-1x1 branch
