@@ -167,10 +167,17 @@ function xtorch.train()
         )
     end
 
+    -- sync
     horses:synchronize() -- wait all horses back
     xtorch.cudaSync()
+
+    -- cache for logging
+    trainLoss = trainLoss/epochSize
+    trainAcc = confusion.totalValid
+
+    -- reset confusion for test
     if opt.verbose then print(confusion) end
-    confusion:zero()     -- reset confusion for test
+    confusion:zero()
 end
 
 ----------------------------------------------------------------
@@ -208,8 +215,14 @@ function xtorch.test()
         )
     end
 
+    -- sync
     horses:synchronize()
     xtorch.cudaSync()
+
+    -- logging
+    testLoss = testLoss/epochSize
+    testAcc = confusion.totalValid
+    utils.log{trainLoss, testLoss, 100*trainAcc, 100*testAcc}
 
     -- save checkpoint
     bestAcc = bestAcc or -math.huge
@@ -219,8 +232,9 @@ function xtorch.test()
         utils.saveCheckpoint(net, epoch, optimState, bestAcc)
     end
 
-    confusion:zero()
+    -- reset for next epoch
     if opt.verbose then print(confusion) end
+    confusion:zero()
     print('\n')
 end
 
