@@ -1,10 +1,10 @@
 require 'nn'
 
-ReLU = nn.ReLU
-Conv = nn.SpatialConvolution
-MaxP = nn.SpatialMaxPooling
-AvgP = nn.SpatialAveragePooling
-BN = nn.SpatialBatchNormalization
+local ReLU = nn.ReLU
+local Conv = nn.SpatialConvolution
+local MaxP = nn.SpatialMaxPooling
+local AvgP = nn.SpatialAveragePooling
+local BN = nn.SpatialBatchNormalization
 
 local shortCutType = 'CONV' or 'ZERO_PAD'
 local blockType = 'BOTTLENECK' or 'BASIC'

@@ -99,7 +99,7 @@ opt = {
     ----------- data options -------------------
     traindata = traindata,
     testdata = testdata,
-    nhorse = 8,   -- nb of threads to load data, default 1
+    nhorse = 8,   -- nb of threads to load data
     ----------- training options ---------------
     batchSize = 128,
     nEpoch = 500,
@@ -109,7 +109,7 @@ opt = {
     criterion = nn.CrossEntropyCriterion,
     optimState = optimState,
     ----------- general options ----------------
-    backend = 'GPU',    -- CPU or GPU, default CPU
+    backend = 'GPU',    -- CPU or GPU
     nGPU = 4,
     resume = true,
     verbose = true

@@ -58,7 +58,6 @@ function ListDataLoader:__parseList()
     for i = 1,N do
         xlua.progress(i,N)
         local line = f:read('*l')
-
         local splited = string.split(line, '%s+')
         ffi.copy(name_data, splited[1])    -- image name
         name_data = name_data + constLength

@@ -15,9 +15,7 @@ dofile('./xtorch-dataset/classdataset.lua')
 traindata = ClassDataset({
    directory = '/search/ssd/liukuang/image/train',
    imsize = 32,
-   transform = {
-       standardize = true
-   }
+   transform = { standardize = true }
 })
 
 -- utilize the training mean & std to test dataset
@@ -28,9 +26,7 @@ testdata = ClassDataset({
    imsize = 32,
    mean = mean,
    std = std,
-   transform = {
-       standardize = true
-   }
+   transform = { standardize = true }
 })
 
 paths.mkdir('cache')
@@ -45,7 +41,7 @@ torch.save('./cache/testdata.t7',testdata)
 dofile('augment.lua')
 dofile('./models/resnet.lua')
 dofile('./models/vgg.lua')
-dofile('./models/googlenet.lua.lua')
+dofile('./models/googlenet.lua')
 
 --net = getResNet()
 --net = getVGG()
@@ -69,7 +65,7 @@ opt = {
     ----------- data options -------------------
     traindata = traindata,
     testdata = testdata,
-    nhorse = 8,   -- nb of threads to load data, default 1
+    nhorse = 8,   -- nb of threads to load data
     ----------- training options ---------------
     batchSize = 128,
     nEpoch = 500,
@@ -79,7 +75,7 @@ opt = {
     criterion = nn.CrossEntropyCriterion,
     optimState = optimState,
     ----------- general options ----------------
-    backend = 'GPU',    -- CPU or GPU, default CPU
+    backend = 'GPU',    -- CPU or GPU
     nGPU = 4,
     resume = true,
     verbose = true

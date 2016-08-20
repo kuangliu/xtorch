@@ -4,11 +4,11 @@
 
 require 'nn'
 
-ReLU = nn.ReLU
-Conv = nn.SpatialConvolution
-MaxP = nn.SpatialMaxPooling
-AvgP = nn.SpatialAveragePooling
-BN = nn.SpatialBatchNormalization
+local ReLU = nn.ReLU
+local Conv = nn.SpatialConvolution
+local MaxP = nn.SpatialMaxPooling
+local AvgP = nn.SpatialAveragePooling
+local BN = nn.SpatialBatchNormalization
 
 function inception(nInputPlane, n1x1, n3x3red, n3x3, n5x5red, n5x5, nPool)
     local cat = nn.Concat(2)

@@ -6,7 +6,7 @@
 dofile('./xtorch-dataset/dataloader/listdataloader.lua')
 
 local ListDataset = torch.class 'ListDataset'
-pathcat = paths.concat
+local pathcat = paths.concat
 
 ---------------------------------------------------------------
 -- ListDataset takes params:

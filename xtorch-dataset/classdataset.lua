@@ -17,7 +17,7 @@
 dofile('./xtorch-dataset/dataloader/classdataloader.lua')
 
 local ClassDataset = torch.class 'ClassDataset'
-pathcat = paths.concat
+local pathcat = paths.concat
 
 ---------------------------------------------------------------
 -- ClassDataset takes params:

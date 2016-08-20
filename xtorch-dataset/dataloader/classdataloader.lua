@@ -10,7 +10,7 @@ dir = require 'pl.dir'
 torch.setdefaulttensortype('torch.FloatTensor')
 
 local ClassDataLoader = torch.class 'ClassDataLoader'
-pathcat = paths.concat
+local pathcat = paths.concat
 
 ---------------------------------------------------------------------------
 -- ClassDataLoader takes:
