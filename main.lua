@@ -1,9 +1,10 @@
-require 'torch'
+require 'pl'
 require 'nn'
 require 'nnx'
+require 'xlua'
+require 'torch'
 require 'optim'
 require 'image'
-require 'pl'
 require 'paths'
 
 utils = dofile('utils.lua')
@@ -77,9 +78,10 @@ opt = {
     ----------- general options ----------------
     backend = 'GPU',    -- CPU or GPU
     nGPU = 4,
-    resume = true,
+    resume = false,
     verbose = true
 }
+opt = xlua.envparams(opt)
 
 ------------------------------------------------
 -- 4. and fit!

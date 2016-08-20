@@ -1,47 +1,43 @@
+--------------------------------------------------------------------------------
+-- This is a modified version of VGG network in
+-- https://github.com/szagoruyko/cifar.torch
+-- Modifications:
+--  - removed dropout
+--  - replace linear layers with convolutional layers and avg-pooling
+--------------------------------------------------------------------------------
 require 'nn'
 
 function getVGG()
-    local vgg = nn.Sequential()
+   local net = nn.Sequential()
 
-    local function ConvBNReLU(nInputPlane, nOutputPlane)
-        vgg:add(nn.SpatialConvolution(nInputPlane, nOutputPlane, 3, 3, 1, 1, 1, 1))
-        vgg:add(nn.SpatialBatchNormalization(nOutputPlane, 1e-3))
-        vgg:add(nn.ReLU(true))
-        return vgg
-    end
+   -- building block
+   local function Block(nInputPlane, nOutputPlane)
+      net:add(nn.SpatialConvolution(nInputPlane, nOutputPlane, 3,3, 1,1, 1,1))
+      net:add(nn.SpatialBatchNormalization(nOutputPlane,1e-3))
+      net:add(nn.ReLU(true))
+      return net
+   end
 
-    local MaxP = nn.SpatialMaxPooling
+   local function MP()
+      net:add(nn.SpatialMaxPooling(2,2,2,2):ceil())
+      return net
+   end
 
-    ConvBNReLU(3,64):add(nn.Dropout(0.3))
-    ConvBNReLU(64,64)
-    vgg:add(MaxP(2,2,2,2):ceil())
+   local function Group(ni, no, N, f)
+      for i=1,N do
+         Block(i == 1 and ni or no, no)
+      end
+      if f then f() end
+   end
 
-    ConvBNReLU(64,128):add(nn.Dropout(0.4))
-    ConvBNReLU(128,128)
-    vgg:add(MaxP(2,2,2,2):ceil())
+   Group(3,64,2,MP)
+   Group(64,128,2,MP)
+   Group(128,256,4,MP)
+   Group(256,512,4,MP)
+   Group(512,512,4)
+   net:add(nn.SpatialAveragePooling(2,2,2,2):ceil())
+   net:add(nn.View(-1):setNumInputDims(3))
+   net:add(nn.Linear(512, 10))
 
-    ConvBNReLU(128,256):add(nn.Dropout(0.4))
-    ConvBNReLU(256,256):add(nn.Dropout(0.4))
-    ConvBNReLU(256,256)
-    vgg:add(MaxP(2,2,2,2):ceil())
-
-    ConvBNReLU(256,512):add(nn.Dropout(0.4))
-    ConvBNReLU(512,512):add(nn.Dropout(0.4))
-    ConvBNReLU(512,512)
-    vgg:add(MaxP(2,2,2,2):ceil())
-
-    ConvBNReLU(512,512):add(nn.Dropout(0.4))
-    ConvBNReLU(512,512):add(nn.Dropout(0.4))
-    ConvBNReLU(512,512)
-    vgg:add(MaxP(2,2,2,2):ceil())
-    vgg:add(nn.View(512):setNumInputDims(3))
-
-    vgg:add(nn.Dropout(0.5))
-    vgg:add(nn.Linear(512,512))
-    vgg:add(nn.BatchNormalization(512))
-    vgg:add(nn.ReLU(true))
-    vgg:add(nn.Dropout(0.5))
-    vgg:add(nn.Linear(512,10))
-
-    return vgg
+   return net
 end
