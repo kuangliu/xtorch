@@ -4,10 +4,10 @@
 
 local PlainDataLoader = torch.class 'PlainDataLoader'
 
-function PlainDataLoader:__init(X,Y)
-    self.X = X
-    self.Y = Y
-    self.N = X:size(1)
+function PlainDataLoader:__init(opt)
+    self.X = opt.X
+    self.Y = opt.Y
+    self.N = self.X:size(1)
 end
 
 ---------------------------------------------------------------

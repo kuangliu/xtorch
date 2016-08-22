@@ -1,24 +1,22 @@
 # xtorch: Torch extension for easy model training & test
 
-## xtorch-dataset
-xtorch dataset module, including `plaindataset`, `listdataset`, `classdataset`, which provides a unified interface for training.  
+## dataloader
+`dataloader` loads samples & targets from files, including `classdataloader`, `listdataloader` and `plaindataloader`.
 
-### `plaindataset`
-Wraps `X` and `Y`. Suitable for small dataset that can be loaded in memory at once.  
+### `plaindataloader`
+Loads `X` and `Y` that can be loaded in memory at once.  
 
 ```lua
-dofile('plaindataset.lua')
-ds = PlainDataset({
+dataloader = PlainDataloader({
     X = samples,
     Y = targets
 })
 ```
 
-### `listdataset`
+### `listdataloader`
 Loads images from disk dynamically with a multithread data loader. Suitable for big dataset that cannot fit in memory.  
 ```lua
-dofile('listdataset.lua')
-ds = ListDataset({
+dataloader = ListDataLoader({
     directory = '/search/ssd/liukuang/cifar10/train/',
     list = '/search/ssd/liukuang/cifar10/train.txt',
     imsize = 32
@@ -27,19 +25,19 @@ ds = ListDataset({
 
 - `directory` is a folder containing images.  
 - `list` is a list files containing the image names and labels/targets separated by spaces.  
+- `imsize` is the image target size.
 
-### `classdataset`
-Loads training & test data from disk. But unlike `listdataset`, there is no index list,
-the images are organized in subfolders, the subfolder names are the class names.
+### `classdataloader`
+Unlike `listdataset`, there is no index list needed,
+the images are organized in subfolders, and the subfolder names are the class names.
 ```lua
-dofile('classdataset.lua')
-ds = ClassDataset({
+dataloader = ClassDataLoader({
     directory = '/search/ssd/liukuang/cifar10/train/',
     imsize = 32
 })
 ```
 
-**Directory Structure**  
+**Directory**  
 ```
 +-- train  
 |  +-- class 1
@@ -60,13 +58,32 @@ ds = ClassDataset({
 |
 ```
 
+## datagen
+`datagen` performs a series of image processing functions, including zero mean, std normalization ...
+The parameters including:
+- `dataloader`: loads images
+- `standardize`: perform zero-mean and std normalization
+- `mean`: input mean
+- `std`: input std
+- ...
+
+Example:
+```lua
+datagen = DataGen({
+    dataloader=testloader,
+    standardize=true,
+    mean=mean,
+    std=std
+})
+```
+
 ## xtorch.fit
 `xtorch.fit(opt)` with `opt`:
 - model options:
     - `net`: network to fit
 - data options:  
-    - `traindata`: train dataset  
-    - `testdata`: test dataset  
+    - `traindata`: train datagen  
+    - `testdata`: test datagen  
     - `nhorse`: nb of threads to load data  
 - training options:
     - `batchSize`: batch size

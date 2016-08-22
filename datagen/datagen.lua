@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
--- datagen wraps dataloader and providing a series of different image processing
--- functions including:
+-- datagen wraps dataloader and providing a series of image processing functions
+-- including:
 --  - zero mean & std normalization
 --  - ...
 --------------------------------------------------------------------------------
