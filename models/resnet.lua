@@ -20,12 +20,12 @@ function shortCut(nInputPlane, nOutputPlane, stride)
         return nn.Identity()
     elseif shortCutType == 'CONV' then
         return nn.Sequential()
-            :add(Conv(nInputPlane, nOutputPlane, 1, 1, stride, stride))
-            :add(BN(nOutputPlane))
+                :add(Conv(nInputPlane, nOutputPlane, 1, 1, stride, stride))
+                :add(BN(nOutputPlane))
     elseif shortCutType == 'ZERO_PAD'then
         return nn.Sequential()
-            :add(AvgPool(1, 1, stride, stride))
-            :add(nn.Concat(2)
+                :add(AvgPool(1, 1, stride, stride))
+                :add(nn.Concat(2)
                 :add(nn.Identity())
                 :add(nn.MulConstant(0)))
     else
@@ -53,11 +53,11 @@ function basicblock(nConvPlane, stride)
     s:add(BN(nConvPlane))
 
     return nn.Sequential()
-        :add(nn.ConcatTable()
-            :add(s)
-            :add(shortCut(nInputPlane, nConvPlane, stride)))
-        :add(nn.CAddTable(true))
-        :add(ReLU(true))
+    :add(nn.ConcatTable()
+    :add(s)
+    :add(shortCut(nInputPlane, nConvPlane, stride)))
+    :add(nn.CAddTable(true))
+    :add(ReLU(true))
 end
 
 function bottleneck(nFirstConvPlane, stride)
@@ -86,11 +86,11 @@ function bottleneck(nFirstConvPlane, stride)
     s:add(BN(nOutputPlane))
 
     return nn.Sequential()
-        :add(nn.ConcatTable()
+            :add(nn.ConcatTable()
             :add(s)
             :add(shortCut(nInputPlane, nOutputPlane, stride)))
-        :add(nn.CAddTable(true))
-        :add(ReLU(true))
+            :add(nn.CAddTable(true))
+            :add(ReLU(true))
 end
 
 function nBlock(nFirstConvPlane, n, stride)

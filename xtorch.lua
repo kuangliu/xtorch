@@ -57,9 +57,9 @@ function xtorch.init()
 
         -- insert data augment layers
         local net_ = nn.Sequential()
-                      :add(nn.BatchFlip():float())
-                      :add(nn.RandomCrop(4, 'zero'):float())
-                      :add(nn.Copy('torch.FloatTensor', 'torch.CudaTensor'))
+                    :add(nn.BatchFlip():float())
+                    :add(nn.RandomCrop(4, 'zero'):float())
+                    :add(nn.Copy('torch.FloatTensor', 'torch.CudaTensor'))
 
         if opt.nGPU == 1 then
             cutorch.setDevice(1)
@@ -85,19 +85,19 @@ function xtorch.initDataLoader()
     else                                           -- multi thread
         threads = require 'threads'
         horses = threads.Threads(opt.nhorse,
-            function()
-                require 'nn'
-                require 'torch'
-            end,
-            function(idx)
-                print('init thread '..idx)
-                dofile('datagen/datagen.lua')
-                dofile('datagen/dataloader/classdataloader.lua')
-                dofile('datagen/dataloader/listdataloader.lua')
-                dofile('datagen/dataloader/plaindataloader.lua')
-            end
-        )
-    end
+        function()
+            require 'nn'
+            require 'torch'
+        end,
+        function(idx)
+            print('init thread '..idx)
+            dofile('datagen/datagen.lua')
+            dofile('datagen/dataloader/classdataloader.lua')
+            dofile('datagen/dataloader/listdataloader.lua')
+            dofile('datagen/dataloader/plaindataloader.lua')
+        end
+    )
+end
 end
 
 ----------------------------------------------------------------
@@ -132,53 +132,53 @@ function xtorch.train()
     local bs = opt.batchSize
     for i = 1,epochSize do
         horses:addjob(
-            -- the job callback (runs in data-worker thread)
-            function()
-                local inputs, targets = dataset:sample(bs)
-                return inputs, targets
-            end,
-            -- the end callback (runs in the main thread)
-            function (inputs, targets)
-                -- cuda sync for each batch
-                xtorch.cudaSync()
-                -- if use GPU, convert to cuda tensor
-                targets = opt.backend=='GPU' and targets:cuda() or targets
+        -- the job callback (runs in data-worker thread)
+        function()
+            local inputs, targets = dataset:sample(bs)
+            return inputs, targets
+        end,
+        -- the end callback (runs in the main thread)
+        function (inputs, targets)
+            -- cuda sync for each batch
+            xtorch.cudaSync()
+            -- if use GPU, convert to cuda tensor
+            targets = opt.backend=='GPU' and targets:cuda() or targets
 
-                feval = function(x)
-                    if x~= parameters then
-                        parameters:copy(x)
-                    end
-
-                    net:zeroGradParameters()
-                    local outputs = net:forward(inputs)
-                    local f = criterion:forward(outputs, targets)
-                    local df_do = criterion:backward(outputs, targets)
-                    net:backward(inputs, df_do)
-                    trainLoss = trainLoss + f
-
-                    -- display progress & loss
-                    confusion:batchAdd(outputs, targets)
-                    confusion:updateValids()
-                    utils.progress(i, epochSize, trainLoss/i, confusion.totalValid)
-                    return f, gradParameters
+            feval = function(x)
+                if x~= parameters then
+                    parameters:copy(x)
                 end
-                opt.optimizer(feval, parameters, optimState)
-                xtorch.cudaSync()
+
+                net:zeroGradParameters()
+                local outputs = net:forward(inputs)
+                local f = criterion:forward(outputs, targets)
+                local df_do = criterion:backward(outputs, targets)
+                net:backward(inputs, df_do)
+                trainLoss = trainLoss + f
+
+                -- display progress & loss
+                confusion:batchAdd(outputs, targets)
+                confusion:updateValids()
+                utils.progress(i, epochSize, trainLoss/i, confusion.totalValid)
+                return f, gradParameters
             end
-        )
-    end
+            opt.optimizer(feval, parameters, optimState)
+            xtorch.cudaSync()
+        end
+    )
+end
 
-    -- sync
-    horses:synchronize() -- wait all horses back
-    xtorch.cudaSync()
+-- sync
+horses:synchronize() -- wait all horses back
+xtorch.cudaSync()
 
-    -- cache for logging
-    trainLoss = trainLoss/epochSize
-    trainAcc = confusion.totalValid
+-- cache for logging
+trainLoss = trainLoss/epochSize
+trainAcc = confusion.totalValid
 
-    -- reset confusion for test
-    if opt.verbose then print(confusion) end
-    confusion:zero()
+-- reset confusion for test
+if opt.verbose then print(confusion) end
+confusion:zero()
 end
 
 ----------------------------------------------------------------
@@ -195,48 +195,48 @@ function xtorch.test()
     testLoss = 0
     for i = 1,epochSize do
         horses:addjob(
-            function()
-                local inputs, targets = dataset:get(bs*(i-1)+1, bs*i)
-                return inputs, targets
-            end,
-            function(inputs, targets)
-                xtorch.cudaSync()
-                targets = opt.backend=='GPU' and targets:cuda() or targets
+        function()
+            local inputs, targets = dataset:get(bs*(i-1)+1, bs*i)
+            return inputs, targets
+        end,
+        function(inputs, targets)
+            xtorch.cudaSync()
+            targets = opt.backend=='GPU' and targets:cuda() or targets
 
-                local outputs = net:forward(inputs)
-                local f = criterion:forward(outputs, targets)
-                testLoss = testLoss + f
+            local outputs = net:forward(inputs)
+            local f = criterion:forward(outputs, targets)
+            testLoss = testLoss + f
 
-                -- display progress
-                confusion:batchAdd(outputs, targets)
-                confusion:updateValids()
-                utils.progress(i, epochSize, testLoss/i, confusion.totalValid)
-                xtorch.cudaSync()
-            end
-        )
-    end
+            -- display progress
+            confusion:batchAdd(outputs, targets)
+            confusion:updateValids()
+            utils.progress(i, epochSize, testLoss/i, confusion.totalValid)
+            xtorch.cudaSync()
+        end
+    )
+end
 
-    -- sync
-    horses:synchronize()
-    xtorch.cudaSync()
+-- sync
+horses:synchronize()
+xtorch.cudaSync()
 
-    -- logging
-    testLoss = testLoss/epochSize
-    testAcc = confusion.totalValid
-    utils.log{trainLoss, testLoss, 100*trainAcc, 100*testAcc}
+-- logging
+testLoss = testLoss/epochSize
+testAcc = confusion.totalValid
+utils.log{trainLoss, testLoss, 100*trainAcc, 100*testAcc}
 
-    -- save checkpoint
-    bestAcc = bestAcc or -math.huge
-    if confusion.totalValid > bestAcc then
-        print('saving..')
-        bestAcc = confusion.totalValid
-        utils.saveCheckpoint(net, epoch, optimState, bestAcc)
-    end
+-- save checkpoint
+bestAcc = bestAcc or -math.huge
+if confusion.totalValid > bestAcc then
+    print('saving..')
+    bestAcc = confusion.totalValid
+    utils.saveCheckpoint(net, epoch, optimState, bestAcc)
+end
 
-    -- reset for next epoch
-    if opt.verbose then print(confusion) end
-    confusion:zero()
-    print('\n')
+-- reset for next epoch
+if opt.verbose then print(confusion) end
+confusion:zero()
+print('\n')
 end
 
 return xtorch

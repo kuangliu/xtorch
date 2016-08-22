@@ -16,13 +16,13 @@ dofile('./datagen/datagen.lua')
 dofile('./datagen/dataloader/classdataloader.lua')
 
 trainloader = ClassDataLoader({
-   directory = '/search/ssd/liukuang/image/train',
-   imsize = 32
+    directory = '/search/ssd/liukuang/image/train',
+    imsize = 32
 })
 
 testloader = ClassDataLoader({
-   directory = '/search/ssd/liukuang/image/test',
-   imsize = 32
+    directory = '/search/ssd/liukuang/image/test',
+    imsize = 32
 })
 
 traindata = DataGen({

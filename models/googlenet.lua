@@ -33,8 +33,8 @@ function inception(nInputPlane, n1x1, n3x3red, n3x3, n5x5red, n5x5, nPool)
                 :add(Conv(nInputPlane,n5x5red,1,1))
                 :add(BN(n5x5red,1e-3))
                 :add(ReLU(true))
-                -- :add(Conv(n5x5red,n5x5,5,5,1,1,2,2)) -- replace 5x5 with 3x3
-                -- :add(BN(n5x5,1e-3))
+                --:add(Conv(n5x5red,n5x5,5,5,1,1,2,2)) -- replace 5x5 with 3x3
+                --:add(BN(n5x5,1e-3))
                 :add(Conv(n5x5red,n5x5,3,3,1,1,1,1))
                 :add(BN(n5x5,1e-3))
                 :add(ReLU(true))
@@ -56,8 +56,8 @@ end
 function getGooglenet()
     local net = nn.Sequential()
     net:add(Conv(3,192,3,3,1,1,1,1))
-        :add(BN(192,1e-3))
-        :add(ReLU(true))
+       :add(BN(192,1e-3))
+       :add(ReLU(true))
 
     local a3 = inception(192,  64,  96, 128, 16, 32, 32)
     local b3 = inception(256, 128, 128, 192, 32, 96, 64)

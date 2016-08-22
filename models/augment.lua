@@ -19,23 +19,23 @@ do -- random crop
     end
 
     function RandomCrop:updateOutput(input)
-      assert(input:dim() == 4)
-      local imsize = input:size(4)
-      if self.train then
-         local padded = self.module:forward(input)
-         local x = torch.random(1,self.pad*2 + 1)
-         local y = torch.random(1,self.pad*2 + 1)
-         self.output = padded:narrow(4,x,imsize):narrow(3,y,imsize)
-      else
-         self.output:set(input)
-      end
-      return self.output
-   end
+        assert(input:dim() == 4)
+        local imsize = input:size(4)
+        if self.train then
+            local padded = self.module:forward(input)
+            local x = torch.random(1,self.pad*2 + 1)
+            local y = torch.random(1,self.pad*2 + 1)
+            self.output = padded:narrow(4,x,imsize):narrow(3,y,imsize)
+        else
+            self.output:set(input)
+        end
+        return self.output
+    end
 
-   function RandomCrop:type(type)
-      self.module:type(type)
-      return parent.type(self, type)
-   end
+    function RandomCrop:type(type)
+        self.module:type(type)
+        return parent.type(self, type)
+    end
 end
 
 
