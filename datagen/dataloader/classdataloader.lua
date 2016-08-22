@@ -18,10 +18,11 @@ local pathcat = paths.concat
 --              the subfolder name is the class name.
 --  - imsize: image load size
 --
-function ClassDataLoader:__init(directory, imsize)
-    assert(paths.dirp(directory), directory..' not exist!')
-    self.directory = directory
-    self.imsize = imsize
+function ClassDataLoader:__init(opt)
+    -- parse args
+    for k,v in pairs(opt) do self[k] = v end
+    assert(paths.dirp(self.directory), self.directory..' not exist!')
+
     self:__getClasses()
     self:__getFileNames()
 end

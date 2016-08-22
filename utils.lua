@@ -8,6 +8,8 @@
 --  - loadCheckpoint: load checkpoint
 --
 
+require 'xlua'
+
 local utils = {}
 ----------------------------------------------------------------------
 -- time

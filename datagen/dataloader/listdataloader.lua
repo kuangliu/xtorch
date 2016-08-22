@@ -17,12 +17,12 @@ local pathcat = paths.concat
 --  - listPath: a text file containing sample names & targets.
 --  - imfunc: the image processing function
 --
-function ListDataLoader:__init(dataPath, listPath, imsize)
-    assert(paths.dirp(dataPath), dataPath..' not exist!')
-    assert(paths.filep(listPath), listPath..' not exist!')
-    self.dataPath = dataPath
-    self.listPath = listPath
-    self.imsize = imsize
+function ListDataLoader:__init(opt)
+    -- parse args
+    for k,v in pairs(opt) do self[k] = v end
+    assert(paths.dirp(self.dataPath), self.dataPath..' not exist!')
+    assert(paths.filep(self.listPath), self.listPath..' not exist!')
+
     self:__parseList()
 end
 

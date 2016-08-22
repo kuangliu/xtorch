@@ -12,29 +12,36 @@ xtorch = dofile('xtorch.lua')
 ------------------------------------------------
 -- 1. prepare data
 --
-dofile('./xtorch-dataset/classdataset.lua')
-traindata = ClassDataset({
-   directory = '/search/ssd/liukuang/image/train',
-   imsize = 32,
-   transform = { standardize = true }
-})
+dofile('./datagen/datagen.lua')
+dofile('./datagen/dataloader/classdataloader.lua')
 
--- utilize the training mean & std to test dataset
-mean,std = traindata:calcMeanStd()
-
-testdata = ClassDataset({
-   directory = '/search/ssd/liukuang/image/test',
-   imsize = 32,
-   mean = mean,
-   std = std,
-   transform = { standardize = true }
-})
-
-paths.mkdir('cache')
-torch.save('./cache/traindata.t7',traindata)
-torch.save('./cache/testdata.t7',testdata)
---traindata = torch.load('./cache/traindata.t7')
---testdata = torch.load('./cache/testdata.t7')
+-- trainloader = ClassDataLoader({
+--    directory = '/search/ssd/liukuang/image/train',
+--    imsize = 32
+-- })
+--
+-- testloader = ClassDataLoader({
+--    directory = '/search/ssd/liukuang/image/test',
+--    imsize = 32
+-- })
+--
+-- traindata = DataGen({
+--     dataloader=trainloader,
+--     standardize=true
+-- })
+-- mean,std = traindata:getmeanstd()
+-- testdata = DataGen({
+--     dataloader=testloader,
+--     standardize=true,
+--     mean=mean,
+--     std=std
+-- })
+--
+-- paths.mkdir('cache')
+-- torch.save('./cache/traindata.t7',traindata)
+-- torch.save('./cache/testdata.t7',testdata)
+traindata = torch.load('./cache/traindata.t7')
+testdata = torch.load('./cache/testdata.t7')
 
 ------------------------------------------------
 -- 2. define net
