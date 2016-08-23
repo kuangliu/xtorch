@@ -83,19 +83,19 @@ function xtorch.initDataLoader()
     else                                           -- multi thread
         threads = require 'threads'
         horses = threads.Threads(opt.nhorse,
-        function()
-            require 'nn'
-            require 'torch'
-        end,
-        function(idx)
-            print('init thread '..idx)
-            dofile('datagen/datagen.lua')
-            dofile('datagen/dataloader/classdataloader.lua')
-            dofile('datagen/dataloader/listdataloader.lua')
-            dofile('datagen/dataloader/plaindataloader.lua')
-        end
-    )
-end
+            function()
+                require 'nn'
+                require 'torch'
+            end,
+            function(idx)
+                print('init thread '..idx)
+                dofile('datagen/datagen.lua')
+                dofile('datagen/dataloader/classdataloader.lua')
+                dofile('datagen/dataloader/listdataloader.lua')
+                dofile('datagen/dataloader/plaindataloader.lua')
+            end
+        )
+    end
 end
 
 ----------------------------------------------------------------

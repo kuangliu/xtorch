@@ -1,8 +1,9 @@
 --------------------------------------------------------------------------------
 -- datagen wraps dataloader and provides a series of image processing and
 -- augumentations function including:
---  - zero mean & std normalization
---  - ...
+--  - standardize: zero mean & std normalization
+--  - randomflip
+--  - randomcrop
 --------------------------------------------------------------------------------
 
 local DataGen = torch.class 'DataGen'
@@ -11,10 +12,11 @@ local pathcat = paths.concat
 ---------------------------------------------------------------
 -- DataGen takes params:
 --  - dataloader: to sample/get data
---  - transform: table representing image processing functions, like
---     - standardize: perform zero mean and std normalization
---     - randomflip: random horizontal flip
---     - randomcrop: random input crop
+--  - standardize: zero mean and std normalization
+--  - randomflip: random horizontal flip
+--  - randomcrop: random input crop
+--  - mean: input mean
+--  - std: input std
 --
 function DataGen:__init(opt)
     for k,v in pairs(opt) do self[k] = v end
@@ -81,14 +83,12 @@ end
 
 ---------------------------------------------------------------
 -- random crop with zero padding
--- after padding, input sized: [N,C,H+2P,W+2P]
--- default pad 4 zeros
 --
 function DataGen:__randomcrop(inputs, pad)
     assert(inputs:dim() == 4, 'random crop input size error!')
-    local P = pad or 4
+    local P = pad or 4  -- default pad 4 pixels
     local N,C,H,W = table.unpack(inputs:size():totable())
-    local padded = torch.zeros(N,C,H+2*P,W+2*P)
+    local padded = torch.zeros(N,C,H+2*P,W+2*P) -- padded sized [N,C,H+2*P,W+2*P]
     padded:narrow(4,1+P,W):narrow(3,1+P,H):copy(inputs)
     local x = torch.random(1,1+2*P)
     local y = torch.random(1,1+2*P)

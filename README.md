@@ -63,13 +63,22 @@ dataloader = ClassDataLoader({
 The parameters including:
 - `dataloader`: loads images
 - `standardize`: perform zero-mean and std normalization
+- `randomflip`: randomly flip inputs
+- `randomcrop`: randomly crop inputs
 - `mean`: input mean
 - `std`: input std
-- ...
 
 Example:
 ```lua
-datagen = DataGen({
+traindata = DataGen({
+    dataloader=trainloader,
+    standardize=true,
+    randomflip=true,
+    randomcrop=true
+})
+mean,std = traindata:getmeanstd()
+
+testdata = DataGen({
     dataloader=testloader,
     standardize=true,
     mean=mean,

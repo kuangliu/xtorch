@@ -17,28 +17,28 @@ dofile('./datagen/datagen.lua')
 dofile('./datagen/dataloader/classdataloader.lua')
 
 trainloader = ClassDataLoader({
-    directory = '/search/ssd/liukuang/image/train',
-    imsize = 32
+    directory='/search/ssd/liukuang/image/train',
+    imsize=32
 })
 
 testloader = ClassDataLoader({
-    directory = '/search/ssd/liukuang/image/test',
-    imsize = 32
+    directory='/search/ssd/liukuang/image/test',
+    imsize=32
 })
 
 traindata = DataGen({
-    dataloader = trainloader,
-    standardize = true,
-    randomflip = true,
-    randomcrop = true
+    dataloader=trainloader,
+    standardize=true,
+    randomflip=true,
+    randomcrop=true
 })
-
 mean,std = traindata:getmeanstd()
+
 testdata = DataGen({
-    dataloader = testloader,
-    standardize = true,
-    mean = mean,
-    std = std
+    dataloader=testloader,
+    standardize=true,
+    mean=mean,
+    std=std
 })
 
 paths.mkdir('cache')
