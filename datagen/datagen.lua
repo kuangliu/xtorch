@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
--- datagen wraps dataloader and providing a series of image processing functions
--- including:
+-- datagen wraps dataloader and provides a series of image processing and
+-- augumentations function including:
 --  - zero mean & std normalization
 --  - ...
 --------------------------------------------------------------------------------
@@ -13,7 +13,8 @@ local pathcat = paths.concat
 --  - dataloader: to sample/get data
 --  - transform: table representing image processing functions, like
 --     - standardize: perform zero mean and std normalization
---     - ...
+--     - randomflip: random horizontal flip
+--     - randomcrop: random input crop
 --
 function DataGen:__init(opt)
     for k,v in pairs(opt) do self[k] = v end
@@ -64,12 +65,43 @@ function DataGen:__standardize(inputs)
 end
 
 ---------------------------------------------------------------
+-- random horizontal flip
+--
+function DataGen:__randomflip(inputs)
+    local batchSize = inputs:size(1)
+    local flipMask = torch.randperm(batchSize):le(batchSize/2)
+
+    for i = 1, batchSize do
+        if flipMask[i] == 1 then
+            image.hflip(inputs[i], inputs[i])
+        end
+    end
+    return inputs
+end
+
+---------------------------------------------------------------
+-- random crop with zero padding
+-- after padding, input sized: [N,C,H+2P,W+2P]
+-- default pad 4 zeros
+--
+function DataGen:__randomcrop(inputs, pad)
+    assert(inputs:dim() == 4, 'random crop input size error!')
+    local P = pad or 4
+    local N,C,H,W = table.unpack(inputs:size():totable())
+    local padded = torch.zeros(N,C,H+2*P,W+2*P)
+    padded:narrow(4,1+P,W):narrow(3,1+P,H):copy(inputs)
+    local x = torch.random(1,1+2*P)
+    local y = torch.random(1,1+2*P)
+    return padded:narrow(4,x,W):narrow(3,y,H)
+end
+
+---------------------------------------------------------------
 -- perform a series of image processing functions on inputs
 --
 function DataGen:__imfunc(inputs)
-    if self.standardize then
-        inputs = self:__standardize(inputs)
-    end
+    if self.standardize then inputs = self:__standardize(inputs) end
+    if self.randomflip then inputs = self:__randomflip(inputs) end
+    if self.randomcrop then inputs = self:__randomcrop(inputs) end
     return inputs
 end
 

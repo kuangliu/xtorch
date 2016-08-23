@@ -168,7 +168,7 @@ function utils.MSRinit(net)
     initbn('nn.SpatialBatchNormalization')
 
     -- init FC layers
-    for _,layer in pairs(net:findModules('nn.Linear') do
+    for _,layer in pairs(net:findModules('nn.Linear')) do
         layer.bias:zero()
     end
 

@@ -9,6 +9,7 @@ require 'paths'
 
 utils = dofile('utils.lua')
 xtorch = dofile('xtorch.lua')
+
 ------------------------------------------------
 -- 1. prepare data
 --
@@ -26,16 +27,18 @@ testloader = ClassDataLoader({
 })
 
 traindata = DataGen({
-    dataloader=trainloader,
-    standardize=true
+    dataloader = trainloader,
+    standardize = true,
+    randomflip = true,
+    randomcrop = true
 })
 
 mean,std = traindata:getmeanstd()
 testdata = DataGen({
-    dataloader=testloader,
-    standardize=true,
-    mean=mean,
-    std=std
+    dataloader = testloader,
+    standardize = true,
+    mean = mean,
+    std = std
 })
 
 paths.mkdir('cache')
