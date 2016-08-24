@@ -233,8 +233,8 @@ function xtorch.test()
 
     -- reset for next epoch
     if opt.verbose then print(confusion) end
-        confusion:zero()
-        print('\n')
-    end
+    confusion:zero()
+    print('\n')
+end
 
 return xtorch

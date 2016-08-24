@@ -4,6 +4,7 @@
 --  - standardize: zero mean & std normalization
 --  - randomflip
 --  - randomcrop
+--  - zca: zca whitening
 --------------------------------------------------------------------------------
 
 local DataGen = torch.class 'DataGen'
