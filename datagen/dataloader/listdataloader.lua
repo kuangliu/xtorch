@@ -79,7 +79,7 @@ function ListDataLoader:__parseList()
     self.targets = targets
 end
 
---------------------------------------
+---------------------------------------------------------------------------
 -- load images from the given indices.
 --
 function ListDataLoader:__loadImages(indices)
@@ -93,7 +93,16 @@ function ListDataLoader:__loadImages(indices)
     return images
 end
 
----------------------------------------------------------
+---------------------------------------------------------------------------
+-- return a batch specified by indices.
+--
+function ListDataLoader:loadBatchByIndex(indices)
+    local images = self:__loadImages(indices)
+    local targets = self.targets:index(1,indices)
+    return images, targets
+end
+
+---------------------------------------------------------------------------
 -- randomly sample quantity images from training dataset.
 -- load samples maybe overlapped.
 --
@@ -105,16 +114,7 @@ function ListDataLoader:sample(quantity)
     return images, targets
 end
 
-------------------------------------------------------------
--- return a batch specified by indices.
---
-function ListDataLoader:loadBatchByIndex(indices)
-    local images = self:__loadImages(indices)
-    local targets = self.targets:index(1,indices)
-    return images, targets
-end
-
-------------------------------------------------
+---------------------------------------------------------------------------
 -- get images in the index range [i1, i2]
 -- used to load test samples.
 --

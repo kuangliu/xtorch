@@ -30,15 +30,13 @@ traindata = DataGen({
     dataloader=trainloader,
     standardize=true,
     randomflip=true,
-    randomcrop=true
+    randomcrop={ size=32, pad=4 }
 })
 mean,std = traindata:getmeanstd()
 
 testdata = DataGen({
     dataloader=testloader,
-    standardize=true,
-    mean=mean,
-    std=std
+    standardize={ mean=mean, std=std }
 })
 
 paths.mkdir('cache')
@@ -51,12 +49,12 @@ torch.save('./cache/testdata.t7',testdata)
 -- 2. define net
 --
 dofile('augment.lua')
-dofile('./models/resnet.lua')
 dofile('./models/vgg.lua')
+dofile('./models/resnet.lua')
 dofile('./models/googlenet.lua')
 
---net = getResNet()
 --net = getVGG()
+--net = getResNet()
 net = getGooglenet()
 
 ------------------------------------------------

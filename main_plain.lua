@@ -43,8 +43,8 @@ dofile('./models/vgg.lua')
 dofile('./models/googlenet.lua')
 
 --net = getResNet()
---net = getVGG()
-net = getGooglenet()
+net = getVGG()
+--net = getGooglenet()
 
 ------------------------------------------------
 -- 3. init optimization params
@@ -64,7 +64,7 @@ opt = {
     ----------- data options -------------------
     traindata = traindata,
     testdata = testdata,
-    nhorse = 8,   -- nb of threads to load data
+    nhorse = 1,   -- nb of threads to load data
     ----------- training options ---------------
     batchSize = 128,
     nEpoch = 500,

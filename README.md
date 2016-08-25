@@ -62,13 +62,16 @@ dataloader = ClassDataLoader({
 `datagen` performs a series of image processing functions, including zero mean, std normalization ...
 The parameters including:
 - `dataloader`: loads images
-- `standardize`: perform zero-mean and std normalization
+- `standardize`: performs zero-mean and std normalization
+    - `mean`: input mean
+    - `std`: input std
 - `randomflip`: randomly flip inputs
 - `randomcrop`: randomly crop inputs
-- `mean`: input mean
-- `std`: input std
+    - `size`: crop size, `default=imsize`
+    - `pad`: zero padding size, `default=4`
 
-Example:
+
+Example 1:
 ```lua
 traindata = DataGen({
     dataloader=trainloader,
@@ -80,11 +83,23 @@ mean,std = traindata:getmeanstd()
 
 testdata = DataGen({
     dataloader=testloader,
-    standardize=true,
-    mean=mean,
-    std=std
+    standardize={ mean=mean, std=std }
 })
 ```
+- `traindata` is standardized with its own `mean` & `std`.
+- `testdata` is standardized with `mean` & `std` from `traindata`.
+- `traindata` is padded with `4` zeors, and cropped the original size out of it.
+
+Example 2:
+```lua
+traindata = DataGen({
+    dataloader=trainloader,
+    standardize=true,
+    randomflip=true,
+    randomcrop={ size=32, pad=2 }
+})
+```
+- `traindata` is padded with `2` zeros, and then cropped `32*32` out of it.
 
 ## xtorch.fit
 `xtorch.fit(opt)` with `opt`:

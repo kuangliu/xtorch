@@ -79,6 +79,17 @@ function ClassDataLoader:__loopfolder(path)
 end
 
 ------------------------------------------------------------------------
+-- randomly load a sample by class
+--
+function ClassDataLoader:__loadSampleByClass(class)
+    local names = self.names[class]
+    local index = torch.random(1, names:size(1))
+    local name = ffi.string(names[index]:data())
+    local im = image.load(pathcat(self.directory, self.classes[class], name))
+    return im
+end
+
+------------------------------------------------------------------------
 -- sample a batch
 -- we first randomly sample class indices, then randomly
 -- sample names from that class.
@@ -94,17 +105,6 @@ function ClassDataLoader:sample(quantity)
         targets[i] = class
     end
     return samples, targets
-end
-
-------------------------------------------------------------------------
--- randomly load a sample by class
---
-function ClassDataLoader:__loadSampleByClass(class)
-    local names = self.names[class]
-    local index = torch.random(1, names:size(1))
-    local name = ffi.string(names[index]:data())
-    local im = image.load(pathcat(self.directory, self.classes[class], name))
-    return im
 end
 
 ------------------------------------------------------------------------
