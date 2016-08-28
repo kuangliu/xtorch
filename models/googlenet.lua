@@ -6,8 +6,8 @@ require 'nn'
 
 local ReLU = nn.ReLU
 local Conv = nn.SpatialConvolution
-local MaxP = nn.SpatialMaxPooling
-local AvgP = nn.SpatialAveragePooling
+local MaxPool = nn.SpatialMaxPooling
+local AvgPool = nn.SpatialAveragePooling
 local BN = nn.SpatialBatchNormalization
 
 function inception(nInputPlane, n1x1, n3x3red, n3x3, n5x5red, n5x5, nPool)
@@ -44,7 +44,7 @@ function inception(nInputPlane, n1x1, n3x3red, n3x3, n5x5red, n5x5, nPool)
 
     -- 3x3pool-1x1 branch
     local b4 = nn.Sequential()
-                :add(MaxP(3,3,1,1,1,1):ceil())
+                :add(MaxPool(3,3,1,1,1,1):ceil())
                 :add(Conv(nInputPlane,nPool,1,1))
                 :add(BN(nPool,1e-3))
                 :add(ReLU(true))
@@ -63,7 +63,7 @@ function getGooglenet()
     local b3 = inception(256, 128, 128, 192, 32, 96, 64)
 
     net:add(a3):add(b3)
-    net:add(MaxP(3,3,2,2,1,1))
+    net:add(MaxPool(3,3,2,2,1,1))
 
     local a4 = inception(480, 192,  96, 208, 16,  48,  64)
     local b4 = inception(512, 160, 112, 224, 24,  64,  64)
@@ -72,13 +72,13 @@ function getGooglenet()
     local e4 = inception(528, 256, 160, 320, 32, 128, 128)
 
     net:add(a4):add(b4):add(c4):add(d4):add(e4)
-    net:add(MaxP(3,3,2,2,1,1))
+    net:add(MaxPool(3,3,2,2,1,1))
 
     local a5 = inception(832, 256, 160, 320, 32, 128, 128)
     local b5 = inception(832, 384, 192, 384, 48, 128, 128)
 
     net:add(a5):add(b5)
-    net:add(AvgP(8,8,1,1))
+    net:add(AvgPool(8,8,1,1))
     net:add(nn.View(1024):setNumInputDims(3))
     net:add(nn.Dropout(0.5))
     net:add(nn.Linear(1024,10))

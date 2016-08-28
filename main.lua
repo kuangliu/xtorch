@@ -48,13 +48,12 @@ torch.save('./cache/testdata.t7',testdata)
 ------------------------------------------------
 -- 2. define net
 --
-dofile('augment.lua')
 dofile('./models/vgg.lua')
 dofile('./models/resnet.lua')
 dofile('./models/googlenet.lua')
 
---net = getVGG()
---net = getResNet()
+-- net = getVGG()
+-- net = getResNet()
 net = getGooglenet()
 
 ------------------------------------------------

@@ -2,8 +2,8 @@ require 'nn'
 
 local ReLU = nn.ReLU
 local Conv = nn.SpatialConvolution
-local MaxP = nn.SpatialMaxPooling
-local AvgP = nn.SpatialAveragePooling
+local MaxPool = nn.SpatialMaxPooling
+local AvgPool = nn.SpatialAveragePooling
 local BN = nn.SpatialBatchNormalization
 
 local shortCutType = 'CONV' or 'ZERO_PAD'
@@ -26,8 +26,8 @@ function shortCut(nInputPlane, nOutputPlane, stride)
         return nn.Sequential()
                 :add(AvgPool(1, 1, stride, stride))
                 :add(nn.Concat(2)
-                :add(nn.Identity())
-                :add(nn.MulConstant(0)))
+                    :add(nn.Identity())
+                    :add(nn.MulConstant(0)))
     else
         error('Unknown shortCutType!')
     end
@@ -53,11 +53,11 @@ function basicblock(nConvPlane, stride)
     s:add(BN(nConvPlane))
 
     return nn.Sequential()
-    :add(nn.ConcatTable()
-    :add(s)
-    :add(shortCut(nInputPlane, nConvPlane, stride)))
-    :add(nn.CAddTable(true))
-    :add(ReLU(true))
+            :add(nn.ConcatTable()
+                :add(s)
+                :add(shortCut(nInputPlane, nConvPlane, stride)))
+            :add(nn.CAddTable(true))
+            :add(ReLU(true))
 end
 
 function bottleneck(nFirstConvPlane, stride)
@@ -76,19 +76,19 @@ function bottleneck(nFirstConvPlane, stride)
     nPlane = nOutputPlane                   -- nPlane flow between blocks
 
     local s = nn.Sequential()
-    s:add(Conv(nInputPlane,nFirstConvPlane,1,1,1,1,0,0))
-    s:add(BN(nFirstConvPlane))
-    s:add(ReLU(true))
-    s:add(Conv(nFirstConvPlane,nFirstConvPlane,3,3,stride,stride,1,1))
-    s:add(BN(nFirstConvPlane))
-    s:add(ReLU(true))
-    s:add(Conv(nFirstConvPlane,nOutputPlane,1,1,1,1,0,0))
-    s:add(BN(nOutputPlane))
+                :add(Conv(nInputPlane,nFirstConvPlane,1,1,1,1,0,0))
+                :add(BN(nFirstConvPlane))
+                :add(ReLU(true))
+                :add(Conv(nFirstConvPlane,nFirstConvPlane,3,3,stride,stride,1,1))
+                :add(BN(nFirstConvPlane))
+                :add(ReLU(true))
+                :add(Conv(nFirstConvPlane,nOutputPlane,1,1,1,1,0,0))
+                :add(BN(nOutputPlane))
 
     return nn.Sequential()
             :add(nn.ConcatTable()
-            :add(s)
-            :add(shortCut(nInputPlane, nOutputPlane, stride)))
+                :add(s)
+                :add(shortCut(nInputPlane, nOutputPlane, stride)))
             :add(nn.CAddTable(true))
             :add(ReLU(true))
 end
