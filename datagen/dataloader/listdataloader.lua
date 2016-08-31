@@ -13,15 +13,14 @@ local pathcat = paths.concat
 
 ---------------------------------------------------------------------------
 -- DataLoader takes:
---  - dataPath: a folder containing the images.
---  - listPath: a text file containing sample names & targets.
---  - imfunc: the image processing function
+--  - directory: directory containing the images.
+--  - list: a list ile containing sample names & targets.
 --
 function ListDataLoader:__init(opt)
     -- parse args
     for k,v in pairs(opt) do self[k] = v end
-    assert(paths.dirp(self.dataPath), self.dataPath..' not exist!')
-    assert(paths.filep(self.listPath), self.listPath..' not exist!')
+    assert(paths.dirp(self.directory), self.directory..' not exist!')
+    assert(paths.filep(self.list), self.list..' not exist!')
 
     self:__parseList()
 end
@@ -46,7 +45,7 @@ function ListDataLoader:__parseList()
     local maxNameLength = -1         -- max file name length
 
     -- get the number of files
-    local N = tonumber(sys.fexecute('ls '..self.dataPath..' | wc -l'))
+    local N = tonumber(sys.fexecute('ls '..self.directory..' | wc -l'))
     self.N = N
 
     local names = torch.CharTensor(N,constLength):fill(0)
@@ -54,7 +53,7 @@ function ListDataLoader:__parseList()
 
     -- parse names and targets line by line
     local name_data = names:data()
-    local f = assert(io.open(self.listPath, 'r'))
+    local f = assert(io.open(self.list, 'r'))
     for i = 1,N do
         xlua.progress(i,N)
         local line = f:read('*l')
@@ -87,7 +86,7 @@ function ListDataLoader:__loadImages(indices)
     local images = torch.Tensor(quantity, 3, self.imsize, self.imsize)
     for i = 1,quantity do
         local name = ffi.string(self.names[indices[i]]:data())
-        local im = image.load(pathcat(self.dataPath, name))
+        local im = image.load(pathcat(self.directory, name))
         images[i] = image.scale(im, self.imsize, self.imsize)
     end
     return images

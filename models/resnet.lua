@@ -6,42 +6,42 @@ local MaxPool = nn.SpatialMaxPooling
 local AvgPool = nn.SpatialAveragePooling
 local BN = nn.SpatialBatchNormalization
 
-local shortCutType = 'CONV' or 'ZERO_PAD'
+local shortcutType = 'CONV' or 'ZERO_PAD'
 local blockType = 'BOTTLENECK' or 'BASIC'
 
+-----------------------------------------------------------------------
+-- The shortcut layer is either:
+--      - Identity: when input shape == output shape
+--      - Zero padding: when input shape ~= output shape
+--      - 1x1 CONV: when input shape ~= output shape
+-----------------------------------------------------------------------
 function shortCut(nInputPlane, nOutputPlane, stride)
-    -----------------------------------------------------------------------
-    -- The shortcut layer is either:
-    --      - Identity: when input shape == output shape
-    --      - Zero padding: when input shape ~= output shape
-    --      - 1x1 CONV: when input shape ~= output shape
-    -----------------------------------------------------------------------
     if nInputPlane == nOutputPlane then
         return nn.Identity()
-    elseif shortCutType == 'CONV' then
+    elseif shortcutType == 'CONV' then
         return nn.Sequential()
                 :add(Conv(nInputPlane, nOutputPlane, 1, 1, stride, stride))
                 :add(BN(nOutputPlane))
-    elseif shortCutType == 'ZERO_PAD'then
+    elseif shortcutType == 'ZERO_PAD'then
         return nn.Sequential()
                 :add(AvgPool(1, 1, stride, stride))
                 :add(nn.Concat(2)
                     :add(nn.Identity())
                     :add(nn.MulConstant(0)))
     else
-        error('Unknown shortCutType!')
+        error('Unknown shortcutType!')
     end
 end
 
+---------------------------------------------------------------------------
+-- The basic block of ResNet: a 2 CONV layer CNN + an Identity shortcut.
+-- In torch we use `ConCatTable` to implement.
+-- Inputs:
+--      - nConvPlane: CONV channels
+--      - stride: CONV stride
+-- Note the 2 CONV layers share the same CONV channels.
+---------------------------------------------------------------------------
 function basicblock(nConvPlane, stride)
-    ---------------------------------------------------------------------------
-    -- The basic block of ResNet: a 2 CONV layer CNN + an Identity shortcut.
-    -- In torch we use `ConCatTable` to implement.
-    -- Inputs:
-    --      - nConvPlane: CONV channels
-    --      - stride: CONV stride
-    -- Note the 2 CONV layers share the same CONV channels.
-    ---------------------------------------------------------------------------
     local nInputPlane = nPlane
     nPlane = nConvPlane
 
@@ -60,17 +60,17 @@ function basicblock(nConvPlane, stride)
             :add(ReLU(true))
 end
 
+-----------------------------------------------------------------------
+-- Bottlenect block.
+-- which follows the structure:
+--      1. 1x1 CONV with nFirstConvPlane channels
+--      2. 3x3 CONV with nFirstConvPlane channels
+--      3. 1x1 CONV with 4*nFirstConvPlane channles
+-- Inputs:
+--      - nFirstConvPlane: CONV channels of the first CONV layer
+--      - stride: CONV stride
+-----------------------------------------------------------------------
 function bottleneck(nFirstConvPlane, stride)
-    -----------------------------------------------------------------------
-    -- Bottlenect block.
-    -- which follows the structure:
-    --      1. 1x1 CONV with nFirstConvPlane channels
-    --      2. 3x3 CONV with nFirstConvPlane channels
-    --      3. 1x1 CONV with 4*nFirstConvPlane channles
-    -- Inputs:
-    --      - nFirstConvPlane: CONV channels of the first CONV layer
-    --      - stride: CONV stride
-    -----------------------------------------------------------------------
     local nInputPlane = nPlane              -- intput data channels
     local nOutputPlane = 4*nFirstConvPlane  -- first conv layer channels
     nPlane = nOutputPlane                   -- nPlane flow between blocks
@@ -93,20 +93,20 @@ function bottleneck(nFirstConvPlane, stride)
             :add(ReLU(true))
 end
 
+-------------------------------------------------------------------------
+-- Stack n basic/bottleneck blocks together
+-- Inputs:
+--      - nFirstConvPlane: CONV channels of the first CONV layer
+--          - For basic block: all CONV layers in the nBlock share the same CONV channels (=nFirstConvPlane)
+--          - For bottlenect block:
+--              - nSecondConvPlane = nFirstConvPlane
+--              - nThirdConvPlane = 4*nFirstConvPlane
+--      - n: # of blocks
+--      - stride: CONV stride of first block, could be 1 or 2
+--          - stride=1: maintain input H&W
+--          - stride=2: decrease input H&W by half
+-------------------------------------------------------------------------
 function nBlock(nFirstConvPlane, n, stride)
-    -------------------------------------------------------------------------
-    -- Stack n basic/bottleneck blocks together
-    -- Inputs:
-    --      - nFirstConvPlane: CONV channels of the first CONV layer
-    --          - For basic block: all CONV layers in the nBlock share the same CONV channels (=nFirstConvPlane)
-    --          - For bottlenect block:
-    --              - nSecondConvPlane = nFirstConvPlane
-    --              - nThirdConvPlane = 4*nFirstConvPlane
-    --      - n: # of blocks
-    --      - stride: CONV stride of first block, could be 1 or 2
-    --          - stride=1: maintain input H&W
-    --          - stride=2: decrease input H&W by half
-    -------------------------------------------------------------------------
     local block
     if blockType == 'BASIC' then
         block = basicblock
@@ -126,10 +126,10 @@ function nBlock(nFirstConvPlane, n, stride)
     return s
 end
 
+--------------------------------------------------
+-- Define the CIFAR-10 ResNet
+--------------------------------------------------
 function getResNet()
-    --------------------------------------------------
-    -- Define the CIFAR-10 ResNet
-    --------------------------------------------------
     local net = nn.Sequential()
     -- net:add(Conv(3,16,3,3,1,1,1,1))
     -- net:add(BN(16))

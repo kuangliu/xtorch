@@ -60,6 +60,7 @@ end
 ---------------------------------------------------------------
 -- perform stardard transform including scale, zero mean
 -- and std normalization
+--
 function DataGen:__standardize(inputs)
     -- scale
     if self.scale then inputs:mul(self.scale) end
