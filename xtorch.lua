@@ -90,9 +90,9 @@ function xtorch.initDataLoader()
             function(idx)
                 print('init thread '..idx)
                 dofile('datagen/datagen.lua')
-                dofile('datagen/dataloader/classdataloader.lua')
-                dofile('datagen/dataloader/listdataloader.lua')
-                dofile('datagen/dataloader/plaindataloader.lua')
+                dofile('dataloader/classdataloader.lua')
+                dofile('dataloader/listdataloader.lua')
+                dofile('dataloader/plaindataloader.lua')
             end
         )
     end

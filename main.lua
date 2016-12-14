@@ -14,30 +14,30 @@ xtorch = dofile('xtorch.lua')
 -- 1. prepare data
 --
 dofile('./datagen/datagen.lua')
-dofile('./datagen/dataloader/classdataloader.lua')
+dofile('./dataloader/classdataloader.lua')
 
-trainloader = ClassDataLoader({
+trainloader = ClassDataLoader {
     directory='/search/ssd/liukuang/image/train',
     imsize=32
-})
+}
 
-testloader = ClassDataLoader({
+testloader = ClassDataLoader {
     directory='/search/ssd/liukuang/image/test',
     imsize=32
-})
+}
 
-traindata = DataGen({
+traindata = DataGen {
     dataloader=trainloader,
     standardize=true,
     randomflip=true,
     randomcrop={ size=32, pad=4 }
-})
+}
 mean,std = traindata:getmeanstd()
 
-testdata = DataGen({
+testdata = DataGen {
     dataloader=testloader,
     standardize={ mean=mean, std=std }
-})
+}
 
 paths.mkdir('cache')
 torch.save('./cache/traindata.t7',traindata)

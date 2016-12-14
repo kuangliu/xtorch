@@ -19,18 +19,18 @@ xtorch = dofile('xtorch.lua')
 -- 1. prepare data
 --
 dofile('./datagen/datagen.lua')
-dofile('./datagen/dataloader/plaindataloader.lua')
+dofile('./dataloader/plaindataloader.lua')
 
 data = torch.load('./cifar10_whitened.t7')
 
-trainloader = PlainDataLoader({ X=data.trainData.data, Y=data.trainData.labels })
-testloader = PlainDataLoader({ X=data.testData.data, Y=data.testData.labels })
+trainloader = PlainDataLoader { X=data.trainData.data, Y=data.trainData.labels }
+testloader = PlainDataLoader { X=data.testData.data, Y=data.testData.labels }
 
-traindata = DataGen({
+traindata = DataGen {
     dataloader=trainloader,
     randomflip=true,
     randomcrop=true
-})
+}
 
 testdata = DataGen({ dataloader=testloader })
 
