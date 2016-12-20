@@ -9,8 +9,8 @@ local Logger = torch.class('Logger')
 
 function Logger:__init(logpath)
     paths.mkdir('log')
-    local file_path = file_path or 'log/'..os.date("%Y-%m-%d %X")
-    self.logfile = io.open(file_path, 'a+')
+    local logpath = logpath or 'log/'..os.date("%Y-%m-%d %X")
+    self.logfile = io.open(logpath, 'a+')
 end
 
 ----------------------------------------
