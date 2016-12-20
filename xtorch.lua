@@ -23,6 +23,9 @@ function xtorch.fit(opt_)
     -- init data loader/horses
     xtorch.initDataLoader()
 
+    -- init logger
+    logger = opt.logger or Logger()
+
     -- main loop
     for i = 1, opt.nEpoch do
         xtorch.train()
@@ -31,7 +34,7 @@ function xtorch.fit(opt_)
 end
 
 ----------------------------------------------------------------
--- resume model from checkpoint
+-- Resume model from checkpoint.
 --
 function xtorch.resume()
     print('==> resuming from checkpoint..')
@@ -44,7 +47,7 @@ function xtorch.resume()
 end
 
 ----------------------------------------------------------------
--- init new model
+-- Init new model.
 --
 function xtorch.init()
     print('==> init new model..')
@@ -73,7 +76,7 @@ function xtorch.init()
 end
 
 ----------------------------------------------------------------
--- init data loader
+-- Init data loader.
 --
 function xtorch.initDataLoader()
     if opt.nhorse == 1 or opt.nhorse == nil then   -- default single thread
@@ -99,35 +102,31 @@ function xtorch.initDataLoader()
 end
 
 ----------------------------------------------------------------
--- cuda synchronize for each epoch/batch training/test.
+-- Cuda synchronize for each epoch/batch training/test.
 --
 function xtorch.cudaSync()
     if opt.backend=='GPU' then cutorch.synchronize() end
 end
 
 ----------------------------------------------------------------
--- training
+-- Training.
 --
 function xtorch.train()
     -- cuda sync for each epoch
     xtorch.cudaSync()
     net:training()
 
-    -- parse arguments
-    local nEpoch = opt.nEpoch
-    local batchSize = opt.batchSize
-    local optimState = opt.optimState
-    local dataset = opt.traindata
     local c = require 'trepl.colorize'
+    local dataset = opt.traindata
+    local bs = opt.batchSize
+    local epochSize = math.floor(dataset.N/bs)
 
     -- epoch tracker
     epoch = (epoch or 0) + 1
-    print(string.format(c.Cyan 'Epoch %d/%d', epoch, nEpoch))
+    print(string.format(c.Cyan 'Epoch %d/%d', epoch, opt.nEpoch))
 
     -- do one epoch
-    trainLoss = 0
-    local epochSize = math.floor(dataset.N/opt.batchSize)
-    local bs = opt.batchSize
+    local trainLoss = 0
     for i = 1,epochSize do
         horses:addjob(
             -- the job callback (runs in data-worker thread)
@@ -152,15 +151,27 @@ function xtorch.train()
                     local f = criterion:forward(outputs, targets)
                     local df_do = criterion:backward(outputs, targets)
                     net:backward(inputs, df_do)
-                    trainLoss = trainLoss + f
 
-                    -- display progress & loss
                     confusion:batchAdd(outputs, targets)
                     confusion:updateValids()
+
+                    -- display progress & loss.
+                    trainLoss = trainLoss + f
                     utils.progress(i, epochSize, trainLoss/i, confusion.totalValid)
+
+                    -- logging.
+                    if i % 10 == 0 then
+                        logger:log {
+                            [1]='Phase: train',
+                            [2]=('Epoch: %d'):format(epoch),
+                            [3]=('Step: %d'):format(i),
+                            [4]=('Loss: %.5f'):format(trainLoss/i),
+                            [5]=('Acc: %.2f%%'):format(confusion.totalValid * 100)
+                        }
+                    end
                     return f, gradParameters
                 end
-                opt.optimizer(feval, parameters, optimState)
+                opt.optimizer(feval, parameters, opt.optimState)
                 xtorch.cudaSync()
             end
         )
@@ -170,17 +181,13 @@ function xtorch.train()
     horses:synchronize() -- wait all horses back
     xtorch.cudaSync()
 
-    -- cache for logging
-    trainLoss = trainLoss/epochSize
-    trainAcc = confusion.totalValid
-
     -- reset confusion for test
     if opt.verbose then print(confusion) end
     confusion:zero()
 end
 
 ----------------------------------------------------------------
--- test
+-- Test.
 --
 function xtorch.test()
     xtorch.cudaSync()
@@ -190,7 +197,7 @@ function xtorch.test()
     local epochSize = math.floor(dataset.N/opt.batchSize)
     local bs = opt.batchSize
 
-    testLoss = 0
+    local testLoss = 0
     for i = 1,epochSize do
         horses:addjob(
             function()
@@ -203,12 +210,24 @@ function xtorch.test()
 
                 local outputs = net:forward(inputs)
                 local f = criterion:forward(outputs, targets)
-                testLoss = testLoss + f
 
-                -- display progress
                 confusion:batchAdd(outputs, targets)
                 confusion:updateValids()
+
+                -- display progress
+                testLoss = testLoss + f
                 utils.progress(i, epochSize, testLoss/i, confusion.totalValid)
+
+                -- logging
+                if i % 10 == 0 then
+                    logger:log {
+                        [1]='Phase: test',
+                        [2]=('Epoch: %d'):format(epoch),
+                        [3]=('Step: %d'):format(i),
+                        [4]=('Loss: %.5f'):format(testLoss/i),
+                        [5]=('Acc: %.2f%%'):format(confusion.totalValid * 100)
+                    }
+                end
                 xtorch.cudaSync()
             end
         )
@@ -217,11 +236,6 @@ function xtorch.test()
     -- sync
     horses:synchronize()
     xtorch.cudaSync()
-
-    -- logging
-    testLoss = testLoss/epochSize
-    testAcc = confusion.totalValid
-    utils.log{trainLoss, testLoss, 100*trainAcc, 100*testAcc}
 
     -- save checkpoint
     bestAcc = bestAcc or -math.huge

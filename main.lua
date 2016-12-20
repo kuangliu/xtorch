@@ -7,11 +7,13 @@ require 'optim'
 require 'image'
 require 'paths'
 
+dofile('logging.lua')
+
 utils = dofile('utils.lua')
 xtorch = dofile('xtorch.lua')
 
 ------------------------------------------------
--- 1. prepare data
+-- 1. Prepare data.
 --
 dofile('./datagen/datagen.lua')
 dofile('./dataloader/classdataloader.lua')
@@ -32,7 +34,7 @@ traindata = DataGen {
     randomflip=true,
     randomcrop={ size=32, pad=4 }
 }
-mean,std = traindata:getmeanstd()
+mean, std = traindata:getmeanstd()
 
 testdata = DataGen {
     dataloader=testloader,
@@ -40,13 +42,13 @@ testdata = DataGen {
 }
 
 paths.mkdir('cache')
-torch.save('./cache/traindata.t7',traindata)
-torch.save('./cache/testdata.t7',testdata)
+torch.save('./cache/traindata.t7', traindata)
+torch.save('./cache/testdata.t7', testdata)
 -- traindata = torch.load('./cache/traindata.t7')
 -- testdata = torch.load('./cache/testdata.t7')
 
 ------------------------------------------------
--- 2. define net
+-- 2. Define model.
 --
 dofile('./models/vgg.lua')
 dofile('./models/resnet.lua')
@@ -57,7 +59,7 @@ dofile('./models/googlenet.lua')
 net = getGooglenet()
 
 ------------------------------------------------
--- 3. init optimization params
+-- 3. Init optimization params.
 --
 optimState = {
     learningRate = 0.001,
@@ -84,14 +86,15 @@ opt = {
     criterion = nn.CrossEntropyCriterion,
     optimState = optimState,
     ----------- general options ----------------
-    backend = 'GPU',    -- CPU or GPU
+    backend = 'GPU',  -- CPU or GPU
     nGPU = 4,
     resume = false,
-    verbose = true
+    verbose = true,
+    logger = Logger()  -- logging
 }
 opt = xlua.envparams(opt)
 
 ------------------------------------------------
--- 4. and fit!
+-- 4. And fit!
 --
 xtorch.fit(opt)
